@@ -1,0 +1,62 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+
+.scan-log {
+  max-height: 70vh;
+  overflow-y: auto;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  padding: 15px;
+  font-family: monospace;
+}
+
+.log-entry {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.agent-name {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.timestamp {
+  color: #6c757d;
+  font-size: 0.8em;
+}
+
+.agent-StrategyGenerator { color: #0d6efd; }
+.agent-SeniorReviewer { color: #198754; }
+.agent-ErrorHandler { color: #dc3545; }
+.agent-ExecutionMonitor { color: #6610f2; }
+.agent-CommandExecutor { color: #fd7e14; }
+.agent-ReportWriter { color: #20c997; }
+.agent-System { color: #6c757d; }
+
+.scan-card {
+  margin-bottom: 20px;
+  transition: transform 0.3s;
+}
+
+.scan-card:hover {
+  transform: translateY(-5px);
+}
+
+.status-running { background-color: #cff4fc; }
+.status-completed { background-color: #d1e7dd; }
+.status-error { background-color: #f8d7da; }
+
+pre {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+} 

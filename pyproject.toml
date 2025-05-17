@@ -6,6 +6,10 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "colorama>=0.4.6",
+    "eventlet>=0.40.0",
+    "flask-cors>=5.0.1",
+    "flask-socketio>=5.5.1",
+    "npm>=0.1.1",
     "openai>=1.79.0",
     "pexpect>=4.9.0",
     "python-dotenv>=1.1.0",

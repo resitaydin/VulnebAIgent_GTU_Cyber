@@ -30,7 +30,7 @@ For more information on Kali Linux metapackages, refer to the [official document
 
 ## OpenAI API Requirement
 
-This project requires an OpenAI API key to function properly. The code is currently configured to use the `o4-mini` model, but you can modify it to use any other available model. To obtain an API key:
+This project requires an OpenAI API key to function properly. The code is currently configured to use the `gpt-4.1` model, but you can modify it to use any other available model. To obtain an API key:
 
 1. Sign up for an account at [OpenAI](https://www.openai.com/) if you haven't already.
 2. Go to the [API Keys](https://platform.openai.com/account/api-keys) page in your account dashboard.

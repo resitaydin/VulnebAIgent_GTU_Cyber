@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Card, Button, Alert, Spinner, Badge } from 'react-bootstrap';
-import { getScanStatus } from '../services/api';
-import { connectToSocket, disconnectFromSocket, subscribeToScanUpdates } from '../services/socket';
+import { getScanStatus, getScanLogs } from '../services/api';
 
 const ScanDetails = () => {
   const { scanId } = useParams();
@@ -11,6 +10,7 @@ const ScanDetails = () => {
   const [status, setStatus] = useState('loading'); // loading, running, completed, error
   const [error, setError] = useState('');
   const logEndRef = useRef(null);
+  const pollingIntervalRef = useRef(null);
   
   // Get initial scan status
   useEffect(() => {
@@ -44,36 +44,71 @@ const ScanDetails = () => {
     fetchScanStatus();
   }, [scanId]);
   
-  // Set up WebSocket connection
+  // Poll for logs every few seconds
   useEffect(() => {
-    connectToSocket();
-    
-    const unsubscribe = subscribeToScanUpdates(scanId, (newLog) => {
-      setLogs(prevLogs => [...prevLogs, newLog]);
-      
-      // Check if scan completed or errored
-      if (newLog.text && typeof newLog.text === 'string') {
-        try {
-          const logData = JSON.parse(newLog.text);
-          if (logData.status === 'completed' || logData.status === 'error') {
-            setStatus(logData.status);
+    const fetchLogs = async () => {
+      try {
+        const logData = await getScanLogs(scanId);
+        if (logData && logData.logs) {
+          setLogs(logData.logs);
+          
+          // Check scan status
+          if (logData.logs.some(log => {
+            try {
+              const logData = JSON.parse(log.text);
+              return logData.status === 'completed' || logData.status === 'error';
+            } catch (e) {
+              return false;
+            }
+          })) {
+            // Update scan status if completed or error is found
+            const newStatus = logData.logs.find(log => {
+              try {
+                const logData = JSON.parse(log.text);
+                return logData.status === 'completed' || logData.status === 'error';
+              } catch (e) {
+                return false;
+              }
+            }).text;
             
-            // Update localStorage
-            const storedScans = JSON.parse(localStorage.getItem('scans') || '[]');
-            const updatedScans = storedScans.map(s => 
-              s.scanId === scanId ? { ...s, status: logData.status } : s
-            );
-            localStorage.setItem('scans', JSON.stringify(updatedScans));
+            try {
+              const statusData = JSON.parse(newStatus);
+              setStatus(statusData.status);
+              
+              // Update localStorage
+              const storedScans = JSON.parse(localStorage.getItem('scans') || '[]');
+              const updatedScans = storedScans.map(s => 
+                s.scanId === scanId ? { ...s, status: statusData.status } : s
+              );
+              localStorage.setItem('scans', JSON.stringify(updatedScans));
+              
+              // If scan is completed or errored, stop polling
+              if (statusData.status === 'completed' || statusData.status === 'error') {
+                if (pollingIntervalRef.current) {
+                  clearInterval(pollingIntervalRef.current);
+                }
+              }
+            } catch (e) {
+              // Not valid JSON status
+            }
           }
-        } catch (e) {
-          // Not JSON, ignore
         }
+      } catch (err) {
+        console.error('Error fetching logs:', err);
       }
-    });
+    };
     
+    // Initial fetch
+    fetchLogs();
+    
+    // Set up polling (every 5 seconds)
+    pollingIntervalRef.current = setInterval(fetchLogs, 5000);
+    
+    // Clean up on unmount
     return () => {
-      unsubscribe();
-      disconnectFromSocket();
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
     };
   }, [scanId]);
   
@@ -175,7 +210,7 @@ const ScanDetails = () => {
           <div className="scan-log">
             {logs.length === 0 ? (
               <div className="p-3 text-center text-muted">
-                Waiting for scan logs...
+                {status === 'running' ? 'Waiting for scan logs...' : 'No logs available'}
               </div>
             ) : (
               logs.map((log, index) => (
@@ -195,8 +230,23 @@ const ScanDetails = () => {
         </Card.Body>
       </Card>
       
-      <div className="mt-3">
+      <div className="mt-3 d-flex justify-content-between">
         <Link to="/" className="btn btn-primary">Back to Home</Link>
+        <Button 
+          variant="outline-primary"
+          onClick={async () => {
+            try {
+              const logData = await getScanLogs(scanId);
+              if (logData && logData.logs) {
+                setLogs(logData.logs);
+              }
+            } catch (err) {
+              console.error('Error refreshing logs:', err);
+            }
+          }}
+        >
+          Refresh Logs
+        </Button>
       </div>
     </div>
   );

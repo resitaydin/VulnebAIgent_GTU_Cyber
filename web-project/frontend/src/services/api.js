@@ -31,6 +31,16 @@ export const getScanStatus = async (scanId) => {
   }
 };
 
+export const getScanLogs = async (scanId) => {
+  try {
+    const response = await api.get(`/api/scan/${scanId}/logs`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error getting logs for ${scanId}:`, error);
+    throw error;
+  }
+};
+
 export const getScanReport = async (scanId) => {
   try {
     const response = await api.get(`/api/scan/${scanId}/report`);

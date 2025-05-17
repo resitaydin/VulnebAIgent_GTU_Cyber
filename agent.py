@@ -21,12 +21,12 @@ class Agent:
 
     def print_agent_output(self, text=None, log_file_path=None):
         color = {
-            "Ammar": Fore.BLUE,
-            "Hassan": Fore.GREEN,
-            "Kofahi": Fore.LIGHTGREEN_EX,
-            "Rakan": Fore.MAGENTA,
-            "Salah": Fore.YELLOW,
-            "Sajed": Fore.CYAN,
+            "StrategyGenerator": Fore.BLUE,
+            "SeniorReviewer": Fore.GREEN,
+            "ErrorHandler": Fore.LIGHTGREEN_EX,
+            "ExecutionMonitor": Fore.MAGENTA,
+            "CommandExecutor": Fore.YELLOW,
+            "ReportWriter": Fore.CYAN,
             "Output": Fore.RED
         }.get(self.name, Fore.RESET)
         
@@ -71,7 +71,7 @@ class Agent:
         ]
         return messages
 
-    def generate_response(self, recipient, user_message, system_message, model="gpt-4-0125-preview", response_format=None):
+    def generate_response(self, recipient, user_message, system_message, model="gpt-4.1", response_format=None):
         chat_history = self.get_chat_history(recipient)
         self.add_to_chat_history(recipient, "user", user_message)
         messages = [

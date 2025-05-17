@@ -1,12 +1,12 @@
 import json
 import os
 from datetime import datetime
-from Agents.ammar import Ammar
-from Agents.hassan import Hassan
-from Agents.kofahi import Kofahi
-from Agents.rakan import Rakan
-from Agents.salah import Salah
-from Agents.sajed import Sajed
+from Agents.strategy_generator import StrategyGenerator
+from Agents.senior_reviewer import SeniorReviewer
+from Agents.error_handler import ErrorHandler
+from Agents.execution_monitor import ExecutionMonitor
+from Agents.command_executor import CommandExecutor
+from Agents.report_writer import ReportWriter
 
 API_KEY = os.getenv("OPENAI_API_KEY") or 'YOUR_API_KEY'
 
@@ -34,46 +34,46 @@ def main():
     scan_description = "EX: find if this target is vulnerable to any exploit on port 22, only using nmap, nothing more"
     log_file_path = initialize_log_file(target_ip, scan_description)
     
-    ammar = Ammar(API_KEY)
-    hassan = Hassan(API_KEY)
-    kofahi = Kofahi(API_KEY)
-    rakan = Rakan(API_KEY)
-    salah = Salah(API_KEY)
-    sajed = Sajed(API_KEY)
+    strategy_generator = StrategyGenerator(API_KEY)
+    senior_reviewer = SeniorReviewer(API_KEY)
+    error_handler = ErrorHandler(API_KEY)
+    execution_monitor = ExecutionMonitor(API_KEY)
+    command_executor = CommandExecutor(API_KEY)
+    report_writer = ReportWriter(API_KEY)
     
     findings = []
 
     print("Initial Strategy:")
-    strategy = ammar.generate_strategy(target_ip, scan_description, log_file_path=log_file_path)
+    strategy = strategy_generator.generate_strategy(target_ip, scan_description, log_file_path=log_file_path)
     findings.append({"strategy": strategy})
 
     while True:
-        reviewed_strategy = hassan.review_strategy(strategy, scan_description, log_file_path=log_file_path)
+        reviewed_strategy = senior_reviewer.review_strategy(strategy, scan_description, log_file_path=log_file_path)
         findings.append({"reviewed_strategy": reviewed_strategy})
 
         if reviewed_strategy["approved"]:
             commands = strategy["strategy"]
-            output = salah.execute_commands(commands, target_ip, scan_description, kofahi, ammar, rakan, log_file_path=log_file_path)
+            output = command_executor.execute_commands(commands, target_ip, scan_description, error_handler, strategy_generator, execution_monitor, log_file_path=log_file_path)
             print("Command Output:")
             print(output)
             findings.append({"commands": commands, "output": output})
-            print("Hassan's Thoughts on the scan result:")
-            hassan_assessment = hassan.review_output(output, scan_description, log_file_path=log_file_path)
-            findings.append({"hassan_assessment": hassan_assessment})
+            print("SeniorReviewer's Thoughts on the scan result:")
+            senior_reviewer_assessment = senior_reviewer.review_output(output, scan_description, log_file_path=log_file_path)
+            findings.append({"senior_reviewer_assessment": senior_reviewer_assessment})
 
-            if hassan_assessment["satisfactory"]:
+            if senior_reviewer_assessment["satisfactory"]:
                 print("Scan completed. Client's requirements have been met.")
                 break
             else:
-                feedback = hassan_assessment["feedback"]
-                strategy = ammar.generate_strategy(target_ip, scan_description, feedback=feedback, log_file_path=log_file_path)
+                feedback = senior_reviewer_assessment["feedback"]
+                strategy = strategy_generator.generate_strategy(target_ip, scan_description, feedback=feedback, log_file_path=log_file_path)
                 findings.append({"updated_strategy_based_on_feedback": strategy})
-                print("Updated strategy based on Hassan's feedback:")
+                print("Updated strategy based on SeniorReviewer's feedback:")
         else:
             feedback = reviewed_strategy["feedback"]
-            print("Hassan's feedback:")
-            print("Updated strategy based on Hassan's feedback:")
-            strategy = ammar.generate_strategy(target_ip, scan_description, feedback=feedback, log_file_path=log_file_path)
+            print("SeniorReviewer's feedback:")
+            print("Updated strategy based on SeniorReviewer's feedback:")
+            strategy = strategy_generator.generate_strategy(target_ip, scan_description, feedback=feedback, log_file_path=log_file_path)
             findings.append({"updated_strategy_based_on_feedback": strategy})
 
     findings_file = "findings.json"
@@ -81,19 +81,19 @@ def main():
         json.dump(findings, f, indent=2)
 
     print("Findings Report:")
-    report = sajed.generate_report(target_ip, scan_description, findings_file, log_file_path=log_file_path)
+    report = report_writer.generate_report(target_ip, scan_description, findings_file, log_file_path=log_file_path)
 
     while True:
-        hassan_review = hassan.review_report(report, log_file_path=log_file_path)
-        findings.append({"hassan_review": hassan_review})
-        print("Hassan's Review:")
-        if hassan_review["Report Approval"]:
-            print("Findings report has been approved by Hassan.")
+        senior_reviewer_review = senior_reviewer.review_report(report, log_file_path=log_file_path)
+        findings.append({"senior_reviewer_review": senior_reviewer_review})
+        print("SeniorReviewer's Review:")
+        if senior_reviewer_review["Report Approval"]:
+            print("Findings report has been approved by SeniorReviewer.")
             break
         else:
-            feedback = hassan_review["feedback"]
-            print("Hassan's feedback:")
-            report = sajed.generate_report(target_ip, scan_description, findings_file, feedback=feedback, log_file_path=log_file_path)
+            feedback = senior_reviewer_review["feedback"]
+            print("SeniorReviewer's feedback:")
+            report = report_writer.generate_report(target_ip, scan_description, findings_file, feedback=feedback, log_file_path=log_file_path)
             print("Updated Findings Report:")
 
     report_file = "findings_report.md"

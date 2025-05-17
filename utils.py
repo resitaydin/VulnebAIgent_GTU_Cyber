@@ -7,12 +7,12 @@ init()
 
 def print_agent_output(agent_name, text=None, log_file_path=None):
     color = {
-        "Ammar": Fore.BLUE,
-        "Hassan": Fore.GREEN,
-        "Kofahi": Fore.LIGHTGREEN_EX,
-        "Rakan": Fore.MAGENTA,
-        "Salah": Fore.YELLOW,
-        "Sajed": Fore.CYAN,
+        "StrategyGenerator": Fore.BLUE,
+        "SeniorReviewer": Fore.GREEN,
+        "ErrorHandler": Fore.LIGHTGREEN_EX,
+        "ExecutionMonitor": Fore.MAGENTA,
+        "CommandExecutor": Fore.YELLOW,
+        "ReportWriter": Fore.CYAN,
         "Output": Fore.RED
     }.get(agent_name, Fore.RESET)
     

@@ -3,11 +3,11 @@ import pexpect
 import time
 from agent import Agent
 import subprocess
-class Salah(Agent):
+class CommandExecutor(Agent):
     def __init__(self, api_key):
-        super().__init__("Salah", api_key)
+        super().__init__("CommandExecutor", api_key)
 
-    def execute_commands(self, commands, target_ip, scan_description, kofahi, ammar, rakan, log_file_path=None):
+    def execute_commands(self, commands, target_ip, scan_description, error_handler, strategy_generator, execution_monitor, log_file_path=None):
         output = ""
         executed_commands = []
         pending_commands = commands.copy()
@@ -32,10 +32,10 @@ class Salah(Agent):
                         
                         elapsed_time = time.time() - start_time
                         if elapsed_time >= 10:
-                            rakan_response = rakan.monitor_output(target_ip, scan_description, command_output, executed_commands, pending_commands, log_file_path)
-                            if rakan_response["input_needed"]:
-                                ammar_response = ammar.generate_input(target_ip, scan_description, command_output, pending_commands, log_file_path)
-                                input_command = ammar_response["input"]
+                            execution_monitor_response = execution_monitor.monitor_output(target_ip, scan_description, command_output, executed_commands, pending_commands, log_file_path)
+                            if execution_monitor_response["input_needed"]:
+                                strategy_generator_response = strategy_generator.generate_input(target_ip, scan_description, command_output, pending_commands, log_file_path)
+                                input_command = strategy_generator_response["input"]
                                 
                                 if input_command:
                                     command_index += 1
@@ -63,13 +63,13 @@ class Salah(Agent):
             except pexpect.exceptions.ExceptionPexpect as e:
                 error_message = f"Error executing command: {command}\nError message: {str(e)}\n\n"
                 context = f"Target IP: {target_ip}\nScan Description: {scan_description}\nCommand Output:\n{output}"
-                kofahi_response = kofahi.handle_error(error_message, context, log_file_path)
-                self.add_to_chat_history("Kofahi", "user", f"Error Message:\n{error_message}\n\nContext:\n{context}")
-                self.add_to_chat_history("Kofahi", "assistant", json.dumps(kofahi_response))
-                print("Error encountered. Kofahi's response:")
-                print(json.dumps(kofahi_response, indent=2))
-                if "fix" in kofahi_response:
-                    fix_commands = kofahi_response["fix"]
+                error_handler_response = error_handler.handle_error(error_message, context, log_file_path)
+                self.add_to_chat_history("ErrorHandler", "user", f"Error Message:\n{error_message}\n\nContext:\n{context}")
+                self.add_to_chat_history("ErrorHandler", "assistant", json.dumps(error_handler_response))
+                print("Error encountered. ErrorHandler's response:")
+                print(json.dumps(error_handler_response, indent=2))
+                if "fix" in error_handler_response:
+                    fix_commands = error_handler_response["fix"]
                     print("Executing fix commands:")
                     for fix_command in fix_commands:
                         print(f"Executing command: {fix_command}")

@@ -92,6 +92,27 @@ const ScanDetails = () => {
               // Not valid JSON status
             }
           }
+        } else {
+          // If logs property doesn't exist, check if there's an error message
+          if (logData && logData.error) {
+            console.warn("Error in logs response:", logData.error);
+            
+            // Check if the error indicates the scan has completed with an error
+            if (logData.error.includes("not found")) {
+              // Update scan status with error
+              const storedScans = JSON.parse(localStorage.getItem('scans') || '[]');
+              const updatedScans = storedScans.map(s => 
+                s.scanId === scanId ? { ...s, status: 'error' } : s
+              );
+              localStorage.setItem('scans', JSON.stringify(updatedScans));
+              setStatus('error');
+              
+              // Stop polling
+              if (pollingIntervalRef.current) {
+                clearInterval(pollingIntervalRef.current);
+              }
+            }
+          }
         }
       } catch (err) {
         console.error('Error fetching logs:', err);

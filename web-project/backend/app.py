@@ -41,7 +41,7 @@ class ScanLogger:
         log_data = {
             "target_ip": target_ip,
             "scan_description": scan_description,
-            "logs": []
+            "output": []
         }
         
         with open(self.log_file_path, "w") as log_file:
@@ -61,7 +61,7 @@ class ScanLogger:
             try:
                 with open(self.log_file_path, "r+") as log_file:
                     log_data = json.load(log_file)
-                    log_data["logs"].append(log_entry)
+                    log_data["output"].append(log_entry)
                     log_file.seek(0)
                     json.dump(log_data, log_file, indent=2)
                     log_file.truncate()
@@ -79,12 +79,16 @@ class LoggingAgent:
         # Get the original method
         original_method = getattr(self.original_agent, name)
         
-        # If method is print_agent_output, intercept it to log
         if name == 'print_agent_output':
             def print_wrapper(text=None, log_file_path=None):
+                # Use our logger's log file path if not provided
+                if not log_file_path and self.logger.log_file_path:
+                    log_file_path = self.logger.log_file_path
+                
                 # Call original method
                 original_method(text, log_file_path)
-                # Also log to our file
+                
+                # Also log to our file directly
                 if text:
                     self.logger.log(self.original_agent.name, text)
                 return None
@@ -92,6 +96,10 @@ class LoggingAgent:
         # Any other callable method
         elif callable(original_method):
             def wrapper(*args, **kwargs):
+                # If the method has log_file_path parameter, ensure it uses our logger's path
+                if 'log_file_path' in kwargs and kwargs['log_file_path'] is None and self.logger.log_file_path:
+                    kwargs['log_file_path'] = self.logger.log_file_path
+                    
                 result = original_method(*args, **kwargs)
                 return result
             return wrapper
@@ -141,7 +149,12 @@ def get_scan_logs(scan_id):
         try:
             with open(log_file, "r") as f:
                 log_data = json.load(f)
-                return jsonify(log_data)
+                # The frontend still expects "logs", so we'll convert from "output" to "logs" here
+                return jsonify({
+                    "target_ip": log_data.get("target_ip", ""),
+                    "scan_description": log_data.get("scan_description", ""),
+                    "logs": log_data.get("output", [])
+                })
         except Exception as e:
             return jsonify({"error": f"Error reading log file: {str(e)}"}), 500
     else:
@@ -212,14 +225,25 @@ def run_scan(scan_id, target_ip, scan_description, api_key):
                 # Execute Commands
                 commands = strategy["strategy"]
                 logger.log("System", f"Executing commands: {json.dumps(commands)}")
-                output = command_executor.execute_commands(
-                    commands, target_ip, scan_description, 
-                    error_handler, strategy_generator, execution_monitor, 
-                    log_file_path=log_file_path
-                )
                 
-                logger.log("System", f"Command output complete")
-                findings.append({"commands": commands, "output": output})
+                try:
+                    output = command_executor.execute_commands(
+                        commands, target_ip, scan_description, 
+                        error_handler, strategy_generator, execution_monitor, 
+                        log_file_path=log_file_path
+                    )
+                    
+                    logger.log("System", f"Command output complete")
+                    findings.append({"commands": commands, "output": output})
+                except Exception as cmd_err:
+                    error_msg = f"Error executing commands: {str(cmd_err)}"
+                    logger.log("System", error_msg)
+                    logger.log("System", json.dumps({
+                        "status": "error",
+                        "error": error_msg
+                    }))
+                    active_scans[scan_id]["status"] = "error"
+                    return
                 
                 # Review Output
                 logger.log("System", "Senior reviewer assessing results...")

@@ -1,0 +1,10 @@
+{
+  "target_ip": "REPLACE TARGET",
+  "scan_description": "EX: find if this target is vulnerable to any exploit on port 22, only using nmap, nothing more",
+  "output": [
+    {
+      "agent_name": "StrategyGenerator",
+      "text": "{\n  \"strategy\": [\n    \"nmap -p 22 REPLACE TARGET\",\n    \"nmap -sV -p 22 REPLACE TARGET\",\n    \"nmap --script vulners -p 22 REPLACE TARGET\",\n    \"nmap --script ssh2-enum-algos,ssh-hostkey,sshv1 -p 22 REPLACE TARGET\",\n    \"nmap --script ssh-auth-methods -p 22 REPLACE TARGET\"\n  ],\n  \"description\": \"This strategy uses only Nmap to thoroughly assess the vulnerability status of port 22 (SSH) on the target IP. The approach is as follows:\\n\\n1. The first command checks if port 22 is open, to confirm it's listening before any further analysis.\\n2. The second command performs service/version detection to accurately identify the SSH server.\\n3. The third command utilizes the 'vulners' NSE script to check for known vulnerabilities via fingerprint matching in public databases.\\n4. The fourth command runs SSH enumeration scripts to gather information about supported SSH algorithms, host keys, and protocol versions, revealing any potential weaknesses (such as support for SSH v1 or weak ciphers).\\n5. The final command enumerates authentication methods supported by the SSH service, and may reveal misconfigurations or dangerous options.\\n\\nSeniorReviewer, based on the results of each command, please advise which step to execute next or whether to expand the scan scope.\\n\\n- StrategyGenerator, Penetration Tester\"\n}"
+    }
+  ]
+}

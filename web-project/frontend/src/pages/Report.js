@@ -1,8 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Card, Alert, Spinner, Button } from 'react-bootstrap';
+import { Card, Alert, Spinner, Button, Table } from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown';
 import { getScanReport } from '../services/api';
+
+// Custom components for react-markdown to render tables using Bootstrap
+const TableWrapper = ({ children }) => {
+  return (
+    <div className="table-responsive">
+      <Table striped bordered hover className="my-4">
+        {children}
+      </Table>
+    </div>
+  );
+};
+
+const TableHead = ({ children }) => <thead className="table-dark">{children}</thead>;
+const TableBody = ({ children }) => <tbody>{children}</tbody>;
+const TableRow = ({ children }) => <tr>{children}</tr>;
+const TableCell = ({ children, isHeader }) => {
+  return isHeader ? <th>{children}</th> : <td>{children}</td>;
+};
 
 const Report = () => {
   const { scanId } = useParams();
@@ -88,7 +106,16 @@ const Report = () => {
       <Card>
         <Card.Body>
           <div className="markdown-report">
-            <ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                table: TableWrapper,
+                thead: TableHead,
+                tbody: TableBody,
+                tr: TableRow,
+                th: ({ children }) => <TableCell isHeader={true}>{children}</TableCell>,
+                td: ({ children }) => <TableCell isHeader={false}>{children}</TableCell>
+              }}
+            >
               {report}
             </ReactMarkdown>
           </div>

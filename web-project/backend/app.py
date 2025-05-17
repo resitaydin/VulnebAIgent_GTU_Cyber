@@ -73,24 +73,36 @@ class WebSocketAgent:
     def __init__(self, original_agent, ws_logger):
         self.original_agent = original_agent
         self.ws_logger = ws_logger
+        self.name = original_agent.name
         
     def __getattr__(self, name):
         original_method = getattr(self.original_agent, name)
         
-        if callable(original_method):
-            def wrapper(*args, **kwargs):
+        if name == 'print_agent_output':
+            # Special handling for print_agent_output
+            def print_wrapper(text=None, log_file_path=None):
+                # Call the original print_agent_output
+                original_method(text, log_file_path)
+                
+                # Also log to WebSocket
+                if text:
+                    self.ws_logger.log(self.original_agent.name, text)
+                
+                return None
+            return print_wrapper
+        elif callable(original_method):
+            # For all other methods
+            def method_wrapper(*args, **kwargs):
                 result = original_method(*args, **kwargs)
                 
-                # Log text output to WebSocket if available
-                if 'text' in kwargs and kwargs['text']:
-                    self.ws_logger.log(self.original_agent.name, kwargs['text'])
-                elif isinstance(result, dict) or isinstance(result, str):
+                # For methods that return results (not print_agent_output)
+                if isinstance(result, dict) or isinstance(result, str):
                     # Try to log the result
                     text = result if isinstance(result, str) else json.dumps(result)
                     self.ws_logger.log(self.original_agent.name, text)
                 
                 return result
-            return wrapper
+            return method_wrapper
         return original_method
 
 # Keep track of running scans
@@ -152,12 +164,12 @@ def run_scan(scan_id, target_ip, scan_description, api_key):
     report_writer = ReportWriter(api_key)
     
     # Wrap with WebSocket loggers
-    ws_strategy_generator = WebSocketAgent(strategy_generator, ws_logger)
-    ws_senior_reviewer = WebSocketAgent(senior_reviewer, ws_logger)
-    ws_error_handler = WebSocketAgent(error_handler, ws_logger)
-    ws_execution_monitor = WebSocketAgent(execution_monitor, ws_logger)
-    ws_command_executor = WebSocketAgent(command_executor, ws_logger)
-    ws_report_writer = WebSocketAgent(report_writer, ws_logger)
+    strategy_generator = WebSocketAgent(strategy_generator, ws_logger)
+    senior_reviewer = WebSocketAgent(senior_reviewer, ws_logger)
+    error_handler = WebSocketAgent(error_handler, ws_logger)
+    execution_monitor = WebSocketAgent(execution_monitor, ws_logger)
+    command_executor = WebSocketAgent(command_executor, ws_logger)
+    report_writer = WebSocketAgent(report_writer, ws_logger)
     
     # Track scan status
     active_scans[scan_id] = {

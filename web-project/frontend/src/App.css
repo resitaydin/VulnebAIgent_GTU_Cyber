@@ -59,4 +59,45 @@ pre {
   padding: 10px;
   border-radius: 5px;
   overflow-x: auto;
+}
+
+/* Markdown report styles */
+.markdown-report h1, 
+.markdown-report h2, 
+.markdown-report h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-report table {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.markdown-report th {
+  font-weight: bold;
+  background-color: #f8f9fa;
+}
+
+.markdown-report .table-responsive {
+  margin: 2rem 0;
+}
+
+.markdown-report blockquote {
+  padding-left: 1rem;
+  border-left: 4px solid #e9ecef;
+  color: #6c757d;
+}
+
+.markdown-report ul, 
+.markdown-report ol {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+}
+
+.markdown-report code {
+  background-color: #f8f9fa;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.9em;
 } 

@@ -71,7 +71,7 @@ class Agent:
         ]
         return messages
 
-    def generate_response(self, recipient, user_message, system_message, model="gpt-4.1", response_format=None):
+    def generate_response(self, recipient, user_message, system_message, model="o4-mini", response_format=None):
         chat_history = self.get_chat_history(recipient)
         self.add_to_chat_history(recipient, "user", user_message)
         messages = [

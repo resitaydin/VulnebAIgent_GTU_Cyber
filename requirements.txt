@@ -1,0 +1,15 @@
+# VulnebAIgent Requirements
+# Generated from pyproject.toml for pip compatibility
+
+colorama>=0.4.6
+eventlet>=0.40.0
+flask-cors>=5.0.1
+flask-socketio>=5.5.1
+npm>=0.1.1
+openai>=1.79.0
+pexpect>=4.9.0
+python-dotenv>=1.1.0
+requests>=2.32.3
+
+# Additional dependencies for development and testing
+flask>=2.0.0 

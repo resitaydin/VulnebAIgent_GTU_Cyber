@@ -1,5 +1,0 @@
-{
-  "target_ip": "REPLACE TARGET",
-  "scan_description": "EX: find if this target is vulnerable to any exploit on port 22, only using nmap, nothing more",
-  "output": []
-}

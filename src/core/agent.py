@@ -1,12 +1,43 @@
+"""
+Base Agent Class for VulnebAIgent
+
+This module provides the base Agent class that all specialized AI agents inherit from.
+It handles common functionality like OpenAI API communication, chat history management,
+and formatted output display.
+
+"""
+
 from openai import OpenAI
 from colorama import init, Fore, Style
 import json
 
 class Agent:
+    """
+    Base class for all AI agents in the VulnebAIgent system.
+    
+    This class provides common functionality for:
+    - OpenAI API communication
+    - Chat history management between agents
+    - Formatted output display with color coding
+    - Logging to JSON files
+    
+    Attributes:
+        name (str): The name/role of this agent
+        client (OpenAI): OpenAI API client instance
+        chat_histories (dict): Conversation histories with other agents
+    """
+    
     def __init__(self, name, api_key):
+        """
+        Initialize the agent with a name and OpenAI API key.
+        
+        Args:
+            name (str): The name/role of this agent (e.g., "StrategyGenerator")
+            api_key (str): OpenAI API key for making requests
+        """
         self.name = name
         self.client = OpenAI(api_key=api_key)
-        self.chat_histories = {}
+        self.chat_histories = {}  # Stores conversation history with each recipient
 
     def get_chat_history(self, recipient):
         if recipient not in self.chat_histories:

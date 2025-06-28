@@ -1,7 +1,7 @@
 import json
 import pexpect
 import time
-from agent import Agent
+from ..core.agent import Agent
 import subprocess
 class CommandExecutor(Agent):
     def __init__(self, api_key):

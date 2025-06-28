@@ -1,5 +1,5 @@
 import json
-from agent import Agent
+from ..core.agent import Agent
 
 class ReportWriter(Agent):
     def __init__(self, api_key):

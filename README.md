@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # VulnebAIgent - Automated Vulnerability Scanning with Agentic AI
 
 ## 📖 Project Description
@@ -404,3 +405,7 @@ For detailed information about each file in this project, please refer to:
 This project is intended for educational and research purposes only. The authors and contributors are not responsible for any misuse or damage caused by the use of this system. Always obtain proper authorization before performing vulnerability scans on any target system.
 
 **Legal Notice**: This tool should only be used on systems you own or have explicit permission to test. Unauthorized vulnerability scanning may be illegal in your jurisdiction.
+=======
+# VulnebAIgent
+VulnebAIgent
+>>>>>>> 76a918dd36a33d0b8fb2d1b6b3f5ad89c7e6421b

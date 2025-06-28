@@ -384,6 +384,7 @@ This project leverages the context of previous scan results to determine the nex
 - The Kali Linux team for the comprehensive security tool suite
 - The open-source community for the various libraries and tools used
 - Research papers and publications that inspired the multi-agent architecture
+- github:salah9003 for providing a baseline for this project.
 
 **Research Citations:**
 This project was inspired by recent research in multi-agent systems and LLM collaboration:
